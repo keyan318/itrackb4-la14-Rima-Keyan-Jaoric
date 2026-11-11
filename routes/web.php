@@ -19,9 +19,7 @@ Route::get('/movies/filter/{value?}', function ($value = null) {
     return redirect()->route('movies.index');
 });
 
-Route::resource('movies', MovieController::class)
-->only(['index', 'show', 'create','store']);
-
+   Route::resource('movies', MovieController::class);
 
 
 

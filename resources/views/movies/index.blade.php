@@ -9,29 +9,15 @@
         <a href="{{ route('movies.create') }}" class="btn btn-success">+ Add Movie</a>
     </div>
 
-    {{-- Active filter status --}}
-    @if($genre || $year)
-        <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
-            <strong>Active filters:</strong>
-            @if($genre)
-                <span class="badge bg-primary">Genre: {{ $genre }}</span>
-            @endif
-            @if($year)
-                <span class="badge bg-secondary">Year: {{ $year }}</span>
-            @endif
-            <a href="{{ route('movies.index') }}" class="btn btn-sm btn-outline-danger ms-auto">
-                ✕ Clear All Filters
-            </a>
-        </div>
-    @endif
+   
 
     {{-- Genre filter links --}}
     <div class="mb-2">
         <span class="fw-semibold me-2">Genre:</span>
-        @foreach(['Action', 'Science Fiction', 'Superhero'] as $g)
-            <a href="{{ route('movies.index', array_filter(['genre' => $g, 'year' => $year])) }}"
-               class="btn btn-sm me-1 {{ $genre === $g ? 'btn-primary' : 'btn-outline-primary' }}">
-                {{ $g }}
+        @foreach($genres as $g)
+            <a href="{{ route('movies.index', array_filter(['genre' => $g->id, 'year' => $year])) }}"
+               class="btn btn-sm me-1 {{ (string)$genre === (string)$g->id ? 'btn-primary' : 'btn-outline-primary' }}">
+                {{ $g->name }}
             </a>
         @endforeach
     </div>
@@ -57,6 +43,7 @@
                 <th>Director</th>
                 <th>Rating</th>
                 <th>Duration</th>
+                <th>Actions</th>
             </tr>
         </thead>
 
@@ -65,24 +52,34 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>
-                        <a href="{{ route('movies.show', $movie['id']) }}" class="fw-bold text-decoration-none">
-                            {{ $movie['title'] }}
+                        <a href="{{ route('movies.show', $movie) }}" class="fw-bold text-decoration-none">
+                            {{ $movie->title }}
                         </a>
                     </td>
-                    <td>{{ $movie['genre'] }}</td>
-                    <td>{{ $movie['year'] }}</td>
-                    <td>{{ $movie['director'] }}</td>
+                    <td>{{ $movie->genre->name ?? '—' }}</td>
+                    <td>{{ $movie->year }}</td>
+                    <td>{{ $movie->director }}</td>
                     <td>
-                        {{ $movie['rating'] }}
-                        @if ($movie['rating'] >= 8.5)
+                        {{ $movie->rating }}
+                        @if ($movie->rating >= 8.5)
                             <span class="badge bg-success">Top Rated</span>
                         @endif
                     </td>
-                    <td>{{ $movie['duration'] }}</td>
+                    <td>{{ $movie->duration }}</td>
+                    <td class="d-flex gap-1">
+                        <a href="{{ route('movies.edit', $movie) }}" class="btn btn-warning btn-sm">Edit</a>
+
+                        <form action="{{ route('movies.destroy', $movie) }}" method="POST"
+                              onsubmit="return confirm('Delete this record?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center">No movies found yet — add some to see them here.</td>
+                    <td colspan="8" class="text-center">No movies found yet — add some to see them here.</td>
                 </tr>
             @endforelse
         </tbody>
