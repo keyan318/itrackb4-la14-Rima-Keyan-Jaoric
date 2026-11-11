@@ -1,13 +1,13 @@
-# Lab Activity 11: Finish Your Own CRUD (Movie App)
+# Laboratory Activity 12 – Make the Failures Yours
 
-## G1. Route model binding
+## H1. Exception Trace
 
-Binding in `MovieController` needs two things: the parameter must be type-hinted with the `Movie` model, and its name must match the route segment `{movie}`, so it is written `Movie $movie`. If only the type-hint is right (for example `Movie $m`), Laravel gives me an empty `Movie` object with no error. If only the name is right (for example `$movie` with no `Movie` type), I get the raw id string back and no record.
+The error page showed a file inside the `vendor` folder because Laravel's own code was handling the invalid method call. However, my actual mistake was in my `MovieController.php`, where I accidentally added an extra letter to the `with()` method. I found the exact location of my mistake by opening the Exception Trace and checking the frame that pointed to my controller.
 
-## G2. The Delete link
+## H2. Logging with Context
 
-The Delete link is an `<a>` tag, and a link can only send a GET request. The `movies/{movie}` address is correct, but my `destroy()` method only answers DELETE, so a GET can never reach it. Only the verb is wrong, which is why the delete only worked once I switched to a form with `@method('DELETE')`.
+My `Log::info()` line with a context array allows me to identify which movie record was saved by checking its ID in `laravel.log`. Next month, I can still look at the log and determine the specific movie record involved, even when the original success message is no longer visible on the page.
 
-## G3. The second argument of old()
+## H3. 403 Forbidden vs. Redirect with a Message
 
-In my edit form, `old('title', $movie->title)` uses the movie's saved title as a fallback. Without the second argument, the form opens empty (like my Screenshot 3) because there is nothing to fall back on. With only the second argument (`$movie->title`), a rejected submit would bring back the original saved title and throw away what I typed, for example a cleared Title would reappear as "The Matrix".
+I used a 403 Forbidden response when a movie is the last remaining movie in its genre because deleting it would leave that genre without any movies. I would use a redirect with a message when an action is not allowed but the user can still correct the situation and continue using the application without being denied access to the request entirely.
