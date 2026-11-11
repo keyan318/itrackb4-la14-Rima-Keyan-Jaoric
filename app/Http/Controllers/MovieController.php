@@ -11,12 +11,22 @@ use Illuminate\Support\Facades\Log;
  
 class MovieController extends Controller
 {
-    public function index(Request $request)
+    
+public function index(Request $request)
 {
     DB::enableQueryLog();
 
+    $search = $request->query('search');
     $genre = $request->query('genre');
-    $year = $request->query('year');
+    $featured = $request->query('featured');
+
+    // Get the requested sort column
+    $sort = $request->query('sort', 'title');
+
+    // Allow only approved columns
+    if (!in_array($sort, ['title', 'year'])) {
+        $sort = 'title';
+    }
 
     $genres = Genre::all();
 
@@ -24,17 +34,32 @@ class MovieController extends Controller
 
     $query = Movie::with('genre');
 
+    // Search by movie title
+    if ($search) {
+        $query->where('title', 'like', "%{$search}%");
+    }
+
+    // Filter by genre
     if ($genre) {
         $query->where('genre_id', $genre);
     }
 
-    if ($year) {
-        $query->where('year', $year);
+    // Filter by featured status
+    if ($featured !== null && $featured !== '') {
+        $query->where('is_featured', $featured);
     }
 
-    $items = $query->get();
+    // Sort, paginate, and preserve URL parameters
+    $items = $query->orderBy($sort)->paginate(6)->withQueryString();
 
-    return view('movies.index', compact('items', 'genre', 'year', 'genres'));
+    return view('movies.index', compact(
+        'items',
+        'genres',
+        'search',
+        'genre',
+        'featured',
+        'sort'
+    ));
 }
 
     public function create()
