@@ -1,13 +1,25 @@
-# Laboratory Activity 12 – Make the Failures Yours
+# Laboratory Activity 13 – Open the Front Door
 
-## H1. Exception Trace
+## Part J – Reflection Questions
 
-The error page showed a file inside the `vendor` folder because Laravel's own code was handling the invalid method call. However, my actual mistake was in my `MovieController.php`, where I accidentally added an extra letter to the `with()` method. I found the exact location of my mistake by opening the Exception Trace and checking the frame that pointed to my controller.
+### 1. Why did I use a HomeController instead of a resource controller?
 
-## H2. Logging with Context
+I used a `HomeController` because my application only needed a custom method to display the homepage. A resource controller is designed to handle the standard CRUD operations, such as `index()`, `create()`, `store()`, `show()`, `edit()`, `update()`, and `destroy()`. I did not need all these methods for my homepage, so using a regular controller was more appropriate.
 
-My `Log::info()` line with a context array allows me to identify which movie record was saved by checking its ID in `laravel.log`. Next month, I can still look at the log and determine the specific movie record involved, even when the original success message is no longer visible on the page.
+### 2. Why did my pagination links lose the search term, and how did I fix it?
 
-## H3. 403 Forbidden vs. Redirect with a Message
+At first, when I clicked the next page, the pagination links only contained the page number and did not include my search term. Because of this, the controller received the page parameter without the original search value, causing the search results to reset.
 
-I used a 403 Forbidden response when a movie is the last remaining movie in its genre because deleting it would leave that genre without any movies. I would use a redirect with a message when an action is not allowed but the user can still correct the situation and continue using the application without being denied access to the request entirely.
+I fixed this by adding `withQueryString()` to my pagination:
+
+```php
+$items = $query->paginate(6)->withQueryString();
+```
+
+This allowed Laravel to preserve the existing query parameters when I navigated between pages.
+
+### 3. Why is allowing an invalid sort value worse than showing an error, and how did I prevent it?
+
+Allowing an invalid sort value is worse because it can cause unexpected behavior or expose the application to unsafe database queries if the value is used directly. Instead of accepting every value from the URL, I created an allowed list containing only `title` and `year`.
+
+I used `in_array()` to check whether the requested sort value was allowed. If the value was invalid, I set the sorting option back to `title`. This allowed the movie list to continue working even when I entered a misspelled sort value in the URL.
