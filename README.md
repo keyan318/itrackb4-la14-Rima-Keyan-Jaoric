@@ -1,25 +1,27 @@
-# Laboratory Activity 13 – Open the Front Door
+# Lab Activity 14 — Locking the Front Door
 
-## Part J – Reflection Questions
+## Part F — README
 
-### 1. Why did I use a HomeController instead of a resource controller?
+### F1. Authentication and Authorization
 
-I used a `HomeController` because my application only needed a custom method to display the homepage. A resource controller is designed to handle the standard CRUD operations, such as `index()`, `create()`, `store()`, `show()`, `edit()`, `update()`, and `destroy()`. I did not need all these methods for my homepage, so using a regular controller was more appropriate.
+This lesson taught me how to implement authentication in my Movie App, allowing users to register, log in, and log out securely. Authorization is still something I need to learn further, especially how to control what specific authenticated users are allowed to do.
 
-### 2. Why did my pagination links lose the search term, and how did I fix it?
+### F2. Session Regeneration
 
-At first, when I clicked the next page, the pagination links only contained the page number and did not include my search term. Because of this, the controller received the page parameter without the original search value, causing the search results to reset.
+I learned that `session()->regenerate()` creates a new session ID after a successful login to help prevent session fixation attacks. If I skip it, an attacker may be able to exploit an existing session ID and compromise a user's session.
 
-I fixed this by adding `withQueryString()` to my pagination:
+### F3. Generic Login Error
 
-```php
-$items = $query->paginate(6)->withQueryString();
-```
+I used the same error message for an incorrect password and an email that does not exist to prevent attackers from identifying registered accounts. This makes my login page safer because it does not reveal which email addresses are registered in my Movie App.
 
-This allowed Laravel to preserve the existing query parameters when I navigated between pages.
+### F4. Public and Protected Routes
 
-### 3. Why is allowing an invalid sort value worse than showing an error, and how did I prevent it?
+I kept the `index` and `show` pages public because visitors should be able to browse the movie list and view movie details without logging in. I protected `create`, `edit`, `update`, and `destroy` because these routes allow users to add, modify, or delete movie records.
 
-Allowing an invalid sort value is worse because it can cause unexpected behavior or expose the application to unsafe database queries if the value is used directly. Instead of accepting every value from the URL, I created an allowed list containing only `title` and `year`.
+### F5. Hiding Buttons Is Not Security
 
-I used `in_array()` to check whether the requested sort value was allowed. If the value was invalid, I set the sorting option back to `title`. This allowed the movie list to continue working even when I entered a misspelled sort value in the URL.
+I hid the Add, Edit, and Delete buttons from guests to prevent them from seeing the movie management controls in the interface. However, hiding these buttons is not enough because someone can manually enter the URL, so I used the `auth` middleware to block unauthorized access to the protected routes.
+
+### F6. Login Route Name
+
+I learned that Laravel's authentication middleware looks for a route named `login` when redirecting unauthenticated users to the login page. If I rename the route, Laravel cannot find the expected route and will throw a `Route [login] not defined` error.
